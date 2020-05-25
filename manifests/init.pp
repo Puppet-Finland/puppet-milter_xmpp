@@ -1,6 +1,8 @@
 #
 # @summary setup milter-xmpp as a system service
 #
+# @param install_prerequisites
+#   Install software required for milter-xmpp to work.
 # @param jabberid
 #   Jabber/XMPP ID
 # @param password
@@ -22,6 +24,7 @@
 #
 class milter_xmpp
 (
+  Boolean               $install_prerequisites,
   String                $jabberid,
   String                $password,
   String                $room,
@@ -34,6 +37,18 @@ class milter_xmpp
 {
 
   $config_dir = '/etc/milter-xmpp'
+
+  if $install_prerequisites {
+    package { ['python3-pip', 'libmilter-dev', 'build-essential']:
+      ensure => 'present',
+    }
+
+    package { ['pymilter', 'xmpppy']:
+      ensure   => 'present',
+      provider => 'pip3',
+      require  => Package['python3-pip'],
+    }
+  }
 
   vcsrepo { '/opt/milter-xmpp':
     ensure   => 'present',
