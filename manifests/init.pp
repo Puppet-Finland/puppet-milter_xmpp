@@ -24,13 +24,13 @@
 #
 class milter_xmpp
 (
-  Boolean               $install_prerequisites,
   String                $jabberid,
   String                $password,
   String                $room,
   String                $server,
   String                $valid_from,
-  Enum['inet', 'inet6'] $proto,
+  Boolean               $install_prerequisites = true,
+  Enum['inet', 'inet6'] $proto = 'inet',
   Integer               $port = 8894,
   String                $iface = 'localhost'
 )
@@ -39,11 +39,15 @@ class milter_xmpp
   $config_dir = '/etc/milter-xmpp'
 
   if $install_prerequisites {
-    package { ['python3-pip', 'libmilter-dev', 'build-essential']:
+    package { [ 'python3-dev',
+                'python3-pip',
+                'python3-setuptools',
+                'libmilter-dev',
+                'build-essential']:
       ensure => 'present',
     }
 
-    package { ['pymilter', 'xmpppy']:
+    package { ['wheel', 'pymilter', 'xmpppy']:
       ensure   => 'present',
       provider => 'pip3',
       require  => Package['python3-pip'],
@@ -63,7 +67,7 @@ class milter_xmpp
     mode   => '0700',
   }
 
-  file { "${config_dir}/milter-xmpp":
+  file { "${config_dir}/milter-xmpp.ini":
     ensure  => 'present',
     content => template('milter_xmpp/milter-xmpp.ini.erb'),
     owner   => 'root',
@@ -91,6 +95,6 @@ class milter_xmpp
   service { 'milter-xmpp':
     ensure  => 'running',
     enable  => true,
-    require => [ File['/etc/systemd/system/milter-xmpp.service'], Exec['milter-xmpp-systemctl-daemon-reload'], File["${config_dir}/milter-xmpp"] ], # lint:ignore:140chars
+    require => [ File['/etc/systemd/system/milter-xmpp.service'], Exec['milter-xmpp-systemctl-daemon-reload'], File["${config_dir}/milter-xmpp.ini"] ], # lint:ignore:140chars
   }
 }
