@@ -55,6 +55,7 @@ class milter_xmpp
     group   => 'root',
     mode    => '0600',
     require => File[$config_dir],
+    notify  => Service['milter-xmpp'],
   }
 
   file { '/etc/systemd/system/milter-xmpp.service':
@@ -75,6 +76,6 @@ class milter_xmpp
   service { 'milter-xmpp':
     ensure  => 'running',
     enable  => true,
-    require => [ File['/etc/systemd/system/milter-xmpp.service'], Exec['milter-xmpp-systemctl-daemon-reload''], File["${config_dir}/milter-xmpp"] ],
+    require => [ File['/etc/systemd/system/milter-xmpp.service'], Exec['milter-xmpp-systemctl-daemon-reload'], File["${config_dir}/milter-xmpp"] ], # lint:ignore:140chars
   }
 }
