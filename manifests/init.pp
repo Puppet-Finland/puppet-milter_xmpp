@@ -3,6 +3,8 @@
 #
 # @param install_prerequisites
 #   Install software required for milter-xmpp to work.
+# @param install_devel_tools
+#   Install (C/C++) development tools (for building Python libraries)
 # @param jabberid
 #   Jabber/XMPP ID
 # @param password
@@ -30,20 +32,23 @@ class milter_xmpp
   String                $server,
   String                $valid_from,
   Boolean               $install_prerequisites = true,
+  Boolean               $install_devel_tools = true,
   Enum['inet', 'inet6'] $proto = 'inet',
   Integer               $port = 8894,
   String                $iface = 'localhost'
-)
+) inherits milter_xmpp::params
 {
 
   $config_dir = '/etc/milter-xmpp'
 
+  if $install_devel_tools {
+    package { $::milter_xmpp::params::devel_tools:
+      ensure => 'present',
+    }
+  }
+
   if $install_prerequisites {
-    package { [ 'python3-dev',
-                'python3-pip',
-                'python3-setuptools',
-                'libmilter-dev',
-                'build-essential']:
+    package { $::milter_xmpp::params::prerequisites:
       ensure => 'present',
     }
 
